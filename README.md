@@ -1,4 +1,4 @@
-# shortest path "visualization"
+# shortest path visualization
 
 
 It's a BFS implementation where the shortest path between two points is displayed. 
