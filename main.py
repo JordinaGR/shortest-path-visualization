@@ -17,8 +17,10 @@ a = maze1
 n = 50
 m = 50
 resise_img = 700
+
 whichChar = StringVar()
 whichAlg = StringVar()
+choseMaze = StringVar()
 
 for j in range(n):
     for i in range(n):
@@ -49,12 +51,44 @@ inc_x = [1, -1, 0, 0]
 inc_y = [0, 0, 1, -1]
 dist = [[-1 for i in range(m)] for i in range(n)]
 
+
+def reset_arrayA():
+    for i in range(n):
+        for j in range(m):
+            if a[i][j] == 'A':
+                a[i][j] = '.'
+
+    return
+
+def reset_variables():
+    global dist, row, col, final_col, final_row, a
+
+    reset_arrayA()
+
+    for j in range(n):
+        for i in range(n):
+            a[j] = list(a[j])
+
+    dist = [[-1 for i in range(m)] for i in range(n)]
+
+    row = -1
+    col = -1
+    for i in range(n):
+        for j in range(m):
+            if a[i][j] == 'S':
+                row = i
+                col = j
+
+    final_row = -1
+    final_col = -1
+
 def drawdata(x, y, col):
     global canvas
     
     canvas.create_rectangle(x*14, y*14, (x*14)+14, (y*14)+14, fill=col)
     #time.sleep(0.0005)
     #root.update_idletasks()
+
 
 def print_matrix(matrix):
     for i in range(n):
@@ -74,6 +108,23 @@ def print_matrix(matrix):
                 drawdata(i, j, path_colo)
 
 print_matrix(a)
+
+def chose_maze_func():
+    global chose_maze, a
+
+    if choseMaze.get() == 'default':
+        a = maze1
+ 
+    elif choseMaze.get() == 'no walls':
+        a = maze2
+
+    else:
+        pass
+    reset_variables()
+    print_matrix(a)
+
+chose_maze_func()
+
 
 def bfs(f, c):
     global final_row, final_col, canvas
@@ -114,7 +165,6 @@ def bfs(f, c):
     info_label.config(text="No s'hi pot arribar!")
     return False
 
-
 def create_path():
     var = dist[final_row][final_col]
     x = final_row
@@ -137,31 +187,6 @@ def create_path():
                 break
     return
 
-def reset_arrayA():
-    for i in range(n):
-        for j in range(m):
-            if a[i][j] == 'A':
-                a[i][j] = '.'
-
-    return
-
-def reset_variables():
-    global dist, row, col, final_col, final_row, a
-
-    reset_arrayA()
-
-    dist = [[-1 for i in range(m)] for i in range(n)]
-
-    row = -1
-    col = -1
-    for i in range(n):
-        for j in range(m):
-            if a[i][j] == 'S':
-                row = i
-                col = j
-
-    final_row = -1
-    final_col = -1
 
 
 def execute_func():
@@ -170,7 +195,6 @@ def execute_func():
         if x:
             create_path()
             print_matrix(a)
-
 
 
 def reset_func():
@@ -249,6 +273,33 @@ def bind_func(event):
     mouse_x = 0
     mouse_y = 0
 
+def bind_auto(event):
+    global mouse_x, mouse_y, entry_x, entry_y, which_char   
+    mouse_x = event.x
+    mouse_y = event.y
+
+    b = True
+
+    for w in widget_list:
+        if w is event.widget:
+            b = False
+
+    if mouse_x >= 14 and mouse_y >= 14 and mouse_x <= 686 and mouse_y <= 686 and which_char.get() == 'Drag walls' and b:
+        cordx = mouse_x // 14
+        cordy = mouse_y // 14
+
+        entry_x.delete(0, END)
+        entry_y.delete(0, END)
+
+        entry_y.insert(0, cordy)
+        entry_x.insert(0, cordx)
+
+        drawdata(cordx, cordy, wall_colo)
+        a[cordx][cordy] = 'X'
+        reset_variables()
+
+    mouse_x = 0
+    mouse_y = 0
 
 # graphics
 execute = Button(root, text='FIND', bg='white', width=6, command=execute_func)
@@ -256,6 +307,13 @@ execute.place(x=resise_img+10, y=10)
 
 reset = Button(root, text='RESET', bg='white', width=6, command=reset_func)
 reset.place(x=788, y=10)
+
+chose_maze = Combobox(root, textvariable=choseMaze, width=10, values=['default', 'no walls', 'maze2'])
+chose_maze.place(x=875, y=15)
+chose_maze.current(['0'])
+
+exe_chose_maze = Button(root, text='RESET\n MAZE', bg='white', width=6, command=chose_maze_func)
+exe_chose_maze.place(x=970, y=10)
 
 explanation = Label(
     root, text="Enter coordinates (x, y), function and click the button.", bg='white', font=('arial', 12))
@@ -268,11 +326,11 @@ entry_y = Entry(root, width=5)
 entry_y.place(x=760, y=140)
 
 which_char = Combobox(root, textvariable=whichChar, values=[
-                      'Start (blue)', 'End (yellow)', 'Wall/path (red/white)'])
+                      'Start (blue)', 'End (yellow)', 'Wall/path (red/white)', 'Drag walls'])
 which_char.place(x=820, y=140)
 which_char.current([2])
 
-which_alg = Combobox(root, textvariable=whichAlg, values=['BFS', 'DFS', 'DIJKSTRA'])
+which_alg = Combobox(root, textvariable=whichAlg, values=['BFS'])
 which_alg.place(x=710, y=220)
 which_alg.current([0])
 
@@ -283,8 +341,9 @@ info = Label(root, text='Punta nord-oest és (1, 1) i sud-est (48, 48) \n sense 
              bg='white', font=('arial', 10))
 info.place(x=resise_img+10, y=170)
 
-widget_list = [execute, reset, explanation, entry_x, entry_y, which_char, change_button, info, info_label]
+widget_list = [execute, reset, explanation, entry_x, entry_y, which_char, change_button, info, info_label, which_alg, exe_chose_maze, chose_maze]
 
 root.bind('<Button 1>', bind_func)
+root.bind('<B1-Motion>', bind_auto)
 
 root.mainloop()
