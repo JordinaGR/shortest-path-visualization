@@ -9,7 +9,7 @@ root.config(bg='white')
 root.minsize(1100, 600)
 canvas = Canvas(root, width=700, height=700, bg='white')
 canvas.pack(side=LEFT)
-info_label = Label(root, text='label', bg='white', fg='red', font=('arial', 15))
+info_label = Label(root, text='', bg='white', fg='red', font=('arial', 15))
 info_label.place(x=710, y=65)
 
 a = maze1
@@ -89,11 +89,10 @@ def drawdata(x, y, col):
     #time.sleep(0.0005)
     #root.update_idletasks()
 
-
 def print_matrix(matrix):
     for i in range(n):
         for j in range(m):
-            if matrix[i][j] == 'X':
+            if matrix[i][j] == 'X' or matrix[i][j] == 'x':
                 drawdata(i, j, wall_colo)
             elif matrix[i][j] == '.':
                 drawdata(i, j, ablep_colo)
@@ -120,6 +119,12 @@ def chose_maze_func():
 
     else:
         pass
+
+    for i in range(n):
+        for j in range(m):
+            if a[i][j] == 'x':
+                a[i][j] = '.'
+
     reset_variables()
     print_matrix(a)
 
@@ -179,15 +184,13 @@ def create_path():
             x2 = x + inc_x[i]
             y2 = y + inc_y[i]
 
-            if (x2 >= 0 and x2 < n and y2 >= 0 and y2 < m and dist[x2][y2] == var-1 and a[x2][y2] != 'X'):
+            if (x2 >= 0 and x2 < n and y2 >= 0 and y2 < m and dist[x2][y2] == var-1 and a[x2][y2] != 'X' and a[x2][y2] != 'x'):
                 a[x2][y2] = 'A'
                 var -= 1
                 x = x2
                 y = y2
                 break
     return
-
-
 
 def execute_func():
     if which_alg.get() == 'BFS':
@@ -235,12 +238,12 @@ def change_cells():
 
         elif which_char.get() == 'Wall/path (red/white)':
             if a[x_cord][y_cord] == '.':
-                a[x_cord][y_cord] = 'X'
+                a[x_cord][y_cord] = 'x'
                 drawdata(x_cord, y_cord, wall_colo)
                 reset_variables()
                 return
                 
-            elif a[x_cord][y_cord] == 'X':
+            elif a[x_cord][y_cord] == 'X' or a[x_cord][y_cord] == 'x':
                 a[x_cord][y_cord] = '.'
                 drawdata(x_cord, y_cord, ablep_colo)
                 reset_variables()
@@ -294,9 +297,10 @@ def bind_auto(event):
         entry_y.insert(0, cordy)
         entry_x.insert(0, cordx)
 
-        drawdata(cordx, cordy, wall_colo)
-        a[cordx][cordy] = 'X'
-        reset_variables()
+        if a[cordx][cordy] == '.':
+            drawdata(cordx, cordy, wall_colo)
+            a[cordx][cordy] = 'x'
+            reset_variables()
 
     mouse_x = 0
     mouse_y = 0
