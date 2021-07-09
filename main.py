@@ -7,6 +7,7 @@ from mazes import maze1, maze2
 root = Tk()
 root.config(bg='white')
 root.minsize(1100, 600)
+root.title('Shortes Path')
 canvas = Canvas(root, width=700, height=700, bg='white')
 canvas.pack(side=LEFT)
 info_label = Label(root, text='', bg='white', fg='red', font=('arial', 15))
@@ -155,8 +156,8 @@ def bfs(f, c):
             if (x2 >= 0 and x2 < n and y2 >= 0 and y2 < m and dist[x2][y2] == -1):
                 dist[x2][y2] = dist[x][y] + 1
                 if a[x2][y2] == 'E':
-                    print('distància mínima', dist[x2][y2])
-                    info_label.config(text=f'Distància mínima {dist[x2][y2]}')
+                    print('Minium distance', dist[x2][y2])
+                    info_label.config(text=f'Minium distance {dist[x2][y2]}')
                     final_row = x2
                     final_col = y2
                     time.sleep(0.5)
@@ -167,7 +168,7 @@ def bfs(f, c):
                     drawdata(x2, y2, bfs_colo2)
                     root.update_idletasks()
 
-    info_label.config(text="No s'hi pot arribar!")
+    info_label.config(text="It's not reachable")
     return False
 
 def create_path():
