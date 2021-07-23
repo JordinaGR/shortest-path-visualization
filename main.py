@@ -31,6 +31,14 @@ final_row = -1
 final_col = -1
 
 # colors
+# wall = X
+# wall edited from gui = x
+# path = A
+# cell = .
+# start = S
+# end = E
+# cell which must go through = M
+
 wall_colo = 'red'
 path_colo = 'black'
 ablep_colo = 'white'
@@ -51,7 +59,6 @@ for i in range(n):
 inc_x = [1, -1, 0, 0]
 inc_y = [0, 0, 1, -1]
 dist = [[-1 for i in range(m)] for i in range(n)]
-
 
 def reset_arrayA():
     for i in range(n):
@@ -132,7 +139,7 @@ def chose_maze_func():
 chose_maze_func()
 
 
-def bfs(f, c):
+def bfs(f, c, end):
     global final_row, final_col, canvas
     info_label.config(text='')
     q = queue()
@@ -155,8 +162,8 @@ def bfs(f, c):
 
             if (x2 >= 0 and x2 < n and y2 >= 0 and y2 < m and dist[x2][y2] == -1):
                 dist[x2][y2] = dist[x][y] + 1
-                if a[x2][y2] == 'E':
-                    print('Minium distance', dist[x2][y2])
+                if a[x2][y2] == end:
+                    #print('Minium distance', dist[x2][y2])
                     info_label.config(text=f'Minium distance {dist[x2][y2]}')
                     final_row = x2
                     final_col = y2
@@ -194,12 +201,13 @@ def create_path():
     return
 
 def execute_func():
+    global must_cell_var, mustcord_x, mustcord_y
+
     if which_alg.get() == 'BFS':
-        x = bfs(row, col)
+        x = bfs(row, col, 'E')
         if x:
             create_path()
             print_matrix(a)
-
 
 def reset_func():
     reset_variables()
@@ -207,7 +215,7 @@ def reset_func():
 
 
 def change_cells():
-    global entry_x, entry_y, a, which_char
+    global entry_x, entry_y, a, which_char, must_cell_var, mustcord_x, mustcord_y
 
     try:
         x_cord = int(entry_x.get())
@@ -253,7 +261,8 @@ def change_cells():
     reset_variables()
 
 def bind_func(event):
-    global mouse_x, mouse_y, entry_x, entry_y, which_char   
+    global mouse_x, mouse_y, entry_x, entry_y, which_char
+
     mouse_x = event.x
     mouse_y = event.y
 
@@ -307,46 +316,38 @@ def bind_auto(event):
     mouse_y = 0
 
 # graphics
-execute = Button(root, text='FIND', bg='white', width=6, command=execute_func)
+execute = Button(root, text='FIND', bg='#45E180', width=6, command=execute_func)
 execute.place(x=resise_img+10, y=10)
 
 reset = Button(root, text='RESET', bg='white', width=6, command=reset_func)
 reset.place(x=788, y=10)
 
-chose_maze = Combobox(root, textvariable=choseMaze, width=10, values=['default', 'no walls', 'maze2'])
+chose_maze = Combobox(root, textvariable=choseMaze, width=10, values=['default', 'no walls'])
 chose_maze.place(x=875, y=15)
 chose_maze.current(['0'])
 
 exe_chose_maze = Button(root, text='RESET\n MAZE', bg='white', width=6, command=chose_maze_func)
-exe_chose_maze.place(x=970, y=10)
-
-explanation = Label(
-    root, text="Enter coordinates (x, y), function and click the button.", bg='white', font=('arial', 12))
-explanation.place(x=resise_img+10, y=105)
+exe_chose_maze.place(x=985, y=10)
 
 entry_x = Entry(root, width=5)
-entry_x.place(x=resise_img+10, y=140)
-
 entry_y = Entry(root, width=5)
-entry_y.place(x=760, y=140)
+
+contr = Label(root, text="CONTROLS: ", bg='white', font=('arial', 12))
+contr.place(x=resise_img+10, y=110)
 
 which_char = Combobox(root, textvariable=whichChar, values=[
                       'Start (blue)', 'End (yellow)', 'Wall/path (red/white)', 'Drag walls'])
-which_char.place(x=820, y=140)
-which_char.current([2])
+which_char.place(x=820, y=110)
+which_char.current([3])
+
+alg_label = Label(root, text="ALGORITHM: ", bg='white', font=('arial', 12))
+alg_label.place(x=resise_img+10, y=150)
 
 which_alg = Combobox(root, textvariable=whichAlg, values=['BFS'])
-which_alg.place(x=710, y=220)
+which_alg.place(x=820, y=150)
 which_alg.current([0])
 
-change_button = Button(root, text='CHANGE', bg='white', command=change_cells)
-change_button.place(x=990, y=135)
-
-info = Label(root, text='Punta nord-oest és (1, 1) i sud-est (48, 48) \n sense contar les parets vermelles.',
-             bg='white', font=('arial', 10))
-info.place(x=resise_img+10, y=170)
-
-widget_list = [execute, reset, explanation, entry_x, entry_y, which_char, change_button, info, info_label, which_alg, exe_chose_maze, chose_maze]
+widget_list = [contr, alg_label, execute, reset, entry_x, entry_y, which_char, info_label, which_alg, exe_chose_maze, chose_maze]
 
 root.bind('<Button 1>', bind_func)
 root.bind('<B1-Motion>', bind_auto)
