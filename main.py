@@ -2,7 +2,11 @@ from tkinter import *
 from collections import deque as queue
 import time
 from tkinter.ttk import Combobox
+from venv import create
 from mazes import maze1, maze2
+import sys
+
+sys.setrecursionlimit(5000)
 
 root = Tk()
 root.config(bg='white')
@@ -200,13 +204,41 @@ def create_path():
                 break
     return
 
+flag = True
+def dfs(x, y):
+    global flag
+
+    dist[x][y] = 0
+
+    drawdata(x, y, bfs_colo)
+    root.update_idletasks()
+    
+    for k in range(4):
+        x2 = x + inc_x[k]
+        y2 = y + inc_y[k]
+        if (flag and x2 >= 0 and x2 < n and y2 >= 0 and y2 < m and a[x2][y2] != 'x' and a[x2][y2] != 'X' and dist[x2][y2] == -1):
+            if (a[x2][y2] == 'E'):
+                flag = False
+                info_label.config(text='There\'s a path')
+                return True
+            else:
+                dfs(x2, y2)
+    
+    if (flag):
+        info_label.config(text='There\'s no path')
+        return False
+
 def execute_func():
-    global must_cell_var, mustcord_x, mustcord_y
+    global must_cell_var, mustcord_x, mustcord_y, flag
 
     if which_alg.get() == 'BFS':
         x = bfs(row, col, 'E')
         if x:
             create_path()
+            print_matrix(a)
+    elif which_alg.get() == 'DFS':
+        flag = True
+        if dfs(row, col):
             print_matrix(a)
 
 def reset_func():
@@ -343,9 +375,9 @@ which_char.current([3])
 alg_label = Label(root, text="ALGORITHM: ", bg='white', font=('arial', 12))
 alg_label.place(x=resise_img+10, y=150)
 
-which_alg = Combobox(root, textvariable=whichAlg, values=['BFS'])
+which_alg = Combobox(root, textvariable=whichAlg, values=['BFS', 'DFS'])
 which_alg.place(x=820, y=150)
-which_alg.current([0])
+which_alg.current([1])
 
 widget_list = [contr, alg_label, execute, reset, entry_x, entry_y, which_char, info_label, which_alg, exe_chose_maze, chose_maze]
 
